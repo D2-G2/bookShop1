@@ -1,18 +1,15 @@
 const express = require('express');
+const { allBooks, bookDetail, categoryBooks } = require('../controller/bookController');
 const router = express.Router();
 
 router.use(express.json());
 
 router.get('/', (req, res) => {
-  res.send('도서 목록 조회');
+  if (Object.keys(req.query).length === 0) {
+    return allBooks(req, res);
+  } else categoryBooks(req, res);
 });
 
-router.get('/:id', (req, res) => {
-  res.send('도서 조회');
-});
-
-router.get('/books', (req, res) => {
-  res.json('카테고리별 도서 목록 조회');
-});
+router.get('/:id', bookDetail);
 
 module.exports = router;
