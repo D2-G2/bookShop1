@@ -1,4 +1,3 @@
-const e = require('express');
 const conn = require('../mariadb');
 const { StatusCodes } = require('http-status-codes');
 
