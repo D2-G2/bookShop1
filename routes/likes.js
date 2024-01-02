@@ -10,3 +10,5 @@ router.get('/:bookId', (req, res) => {
 router.delete('/:bookId', (req, res) => {
   res.send('좋아요 삭제');
 });
+
+module.exports = router;
