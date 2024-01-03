@@ -47,3 +47,83 @@ router.post('/reset', passwordResetRequest);
 router.put('/reset', passwordReset);
 
 module.exports = router;
+
+/**
+ * @swagger
+ * paths:
+ *  /login:
+ *   post:
+ *    tags: [user]
+ *    summary: 로그인
+ *    requestBody:
+ *      description: 로그인
+ *      required: true
+ *      content:
+ *        application/json:
+ *    responses:
+ *      200:
+ *       description: 로그인 성공
+ *       content:
+ *          application/json:
+ *              schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *  /join:
+ *   post:
+ *    tags: [user]
+ *    summary: 회원가입
+ *    requestBody:
+ *      description: 회원가입
+ *      required: true
+ *      content:
+ *        application/json:
+ *    responses:
+ *      201:
+ *       description: 회원가입 성공
+ *       content:
+ *          application/json:
+ *              schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *  /reset:
+ *   post:
+ *    tags: [user]
+ *    summary: 비밀번호 초기화 요청
+ *    requestBody:
+ *      description: 비밀번호 초기화 요청
+ *      required: true
+ *      content:
+ *        application/json:
+ *    responses:
+ *      201:
+ *       description: 비밀번호 초기화 요청 성공
+ *       content:
+ *          application/json:
+ *              schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ *   put:
+ *    tags: [user]
+ *    summary: 비밀번호 초기화
+ *    requestBody:
+ *      description: 비밀번호 초기화
+ *      required: true
+ *      content:
+ *        application/json:
+ *    responses:
+ *      201:
+ *       description: 비밀번호 초기화 성공
+ *       content:
+ *          application/json:
+ *              schema:
+ *                  type: object
+ *                  properties:
+ *                      status:
+ *                          type: string
+ */

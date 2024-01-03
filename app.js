@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const { swaggerUi, specs } = require('./modules/swagger');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -18,3 +19,5 @@ app.use('/likes', likeRouter);
 app.use('/orders', orderRouter);
 app.use('/carts', cartRouter);
 app.use('/category', categoryRouter);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
