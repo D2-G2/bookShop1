@@ -12,7 +12,7 @@ router.get('/', allBooks);
 //   } else categoryBooks(req, res);
 // });
 
-router.get('/:id', bookDetail);
+router.get('/:bookId', bookDetail);
 
 module.exports = router;
 

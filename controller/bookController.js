@@ -12,7 +12,7 @@ const allBooks = (req, res) => {
   limit = parseInt(limit);
   let offset = (currentPage - 1) * limit;
 
-  let sql = 'SELECT * FROM books';
+  let sql = 'SELECT *, (select count(*) from likes where liked_book_id=books.id) as likes FROM books';
   let values = [];
 
   if (categoryId && news) {
@@ -35,13 +35,17 @@ const allBooks = (req, res) => {
 };
 
 const bookDetail = (req, res) => {
-  const { id } = req.params;
+  const { bookId } = req.params;
+  const { userId } = req.body;
+  const values = [userId, bookId, bookId];
 
-  let sql = `SELECT * FROM books 
-              LEFT JOIN category ON books.category_id = category.id
-              WHERE books.id = ?`;
+  let sql = `SELECT *, 
+  (SELECT COUNT(*) FROM likes WHERE liked_book_id=books.id) AS likes,
+  (SELECT EXISTS (SELECT * FROM likes WHERE user_id=? AND liked_book_id=?)) AS liked
+  FROM books
+  LEFT JOIN category ON books.category_id = category.category_id WHERE books.id=?;`;
 
-  conn.query(sql, id, (err, results) => {
+  conn.query(sql, values, (err, results) => {
     if (err) return handleDatabaseError(err, res);
     if (results[0]) return res.status(StatusCodes.OK).json(results[0]);
     else return res.status(StatusCodes.NOT_FOUND).end();
