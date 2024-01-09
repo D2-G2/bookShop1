@@ -1,22 +1,19 @@
 const express = require('express');
+const {
+  addCartItem,
+  getCartItems,
+  deleteCartItem,
+  getSelectedCartItems,
+  updateCartItemSelection,
+} = require('../controller/cartController');
 const router = express.Router();
 
 router.use(express.json());
 
-router.put('/', (req, res) => {
-  res.send('장바구니 담기');
-});
+router.put('/', addCartItem);
 
-router.get('/', (req, res) => {
-  res.send('장바구니 조회');
-});
+router.get('/', getCartItems);
 
-router.delete('/:id', (req, res) => {
-  res.send('장바구니 삭제');
-});
-
-router.get('/', (req, res) => {
-  res.send('장바구니 목록 조회');
-});
+router.delete('/:bookId', deleteCartItem);
 
 module.exports = router;
