@@ -8,6 +8,6 @@ router.post('/', order);
 
 router.get('/', getOrders);
 
-router.get('/:id', getOrderDetail);
+router.get('/:orderId', getOrderDetail);
 
 module.exports = router;
