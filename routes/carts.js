@@ -10,10 +10,10 @@ const router = express.Router();
 
 router.use(express.json());
 
-router.put('/', addCartItem);
+router.post('/', addCartItem);
 
 router.get('/', getCartItems);
 
-router.delete('/:bookId', deleteCartItem);
+router.delete('/:cartItemId', deleteCartItem);
 
 module.exports = router;
