@@ -67,7 +67,7 @@ const getOrderDetail = async (req, res) => {
       message: '잘못된 토큰입니다.',
     });
   } else {
-    const orderId = req.params;
+    const { orderId } = req.params;
     const conn = await mariadb.createConnection({
       host: 'localhost',
       user: 'root',
@@ -76,12 +76,19 @@ const getOrderDetail = async (req, res) => {
       dateStrings: 'true',
     });
 
-    let sql = `SELECT orders.id, created_at, address, receiver, contact, book_title, total_quantity, total_price 
-              FROM orders
-              LEFT JOIN delivery
-              ON orders.delivery_id = delivery.id
-              WHERE orders.id = ?`;
-    let [rows, fields] = await conn.query(sql, [orderId]);
+    let sql = `SELECT book_id, title, author, price, quantity
+    FROM orderedBook
+    LEFT JOIN books
+    ON orderedBook.book_id = books.id
+    WHERE order_id = ?`;
+    let [rows, fields] = await conn.query(sql, orderId);
+    rows = rows.map((row) => {
+      const { book_id, ...rest } = row;
+      return {
+        ...rest,
+        bookId: book_id,
+      };
+    });
     return res.status(StatusCodes.OK).json(rows);
   }
 };
@@ -104,12 +111,20 @@ const getOrders = async (req, res) => {
       database: 'Bookshop',
       dateStrings: 'true',
     });
-
-    let sql = `SELECT book_id, title, author, price, quantity
-              FROM orderedBook
-              LEFT JOIN books
-              ON orderedBook.book_id = books.id`;
+    let sql = `SELECT orders.id, created_at, address, receiver, contact, book_title, total_quantity, total_price 
+              FROM orders LEFT JOIN delivery
+              ON orders.delivery_id = delivery.id`;
     let [rows, fields] = await conn.query(sql);
+    rows = rows.map((row) => {
+      const { created_at, book_title, total_quantity, total_price, ...rest } = row;
+      return {
+        ...rest,
+        createdAt: created_at,
+        bookTitle: book_title,
+        totalQuantity: total_quantity,
+        totalPrice: total_price,
+      };
+    });
     return res.status(StatusCodes.OK).json(rows);
   }
 };
