@@ -41,6 +41,7 @@ const login = (req, res) => {
     if (loginUser && loginUser.password === hashpassword) {
       const token = jwt.sign(
         {
+          id: loginUser.id,
           email: loginUser.email,
         },
         process.env.PRIVATE_KEY,
