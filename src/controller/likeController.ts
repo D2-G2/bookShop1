@@ -1,9 +1,10 @@
-const conn = require('../mariadb');
-const { ensureAuthorization } = require('../auth');
-const { StatusCodes } = require('http-status-codes');
-let jwt = require('jsonwebtoken');
+import conn from '../db/mariadb';
+import ensureAuthorization from '../auth/auth';
+import StatusCodes from 'http-status-codes';
+import jwt from 'jsonwebtoken';
+import { Request, Response } from 'express';
 
-const addLike = (req, res) => {
+const addLike = (req: Request, res: Response) => {
   const { bookId } = req.params;
 
   let authorization = ensureAuthorization(req);
@@ -15,7 +16,7 @@ const addLike = (req, res) => {
     return res.status(StatusCodes.BAD_REQUEST).json({
       message: '잘못된 토큰입니다.',
     });
-  } else {
+  } else if (authorization instanceof Object) {
     let sql = 'INSERT INTO likes (user_id, liked_book_id) VALUES (?, ?)';
     let values = [authorization.id, bookId];
 
@@ -28,7 +29,7 @@ const addLike = (req, res) => {
     });
   }
 };
-const removeLike = (req, res) => {
+const removeLike = (req: Request, res: Response) => {
   const { bookId } = req.params;
 
   let authorization = ensureAuthorization(req);
@@ -40,11 +41,11 @@ const removeLike = (req, res) => {
     return res.status(StatusCodes.BAD_REQUEST).json({
       message: '잘못된 토큰입니다.',
     });
-  } else {
+  } else if (authorization instanceof Object) {
     let sql = 'DELETE FROM likes WHERE user_id = ? AND liked_book_id = ?';
     let values = [authorization.id, bookId];
 
-    conn.query(sql, values, (err, results) => {
+    conn.query(sql, values, (err) => {
       if (err) {
         console.log(err);
         return res.status(StatusCodes.BAD_REQUEST).end();
@@ -53,4 +54,5 @@ const removeLike = (req, res) => {
     });
   }
 };
-module.exports = { addLike, removeLike };
+
+export { addLike, removeLike };

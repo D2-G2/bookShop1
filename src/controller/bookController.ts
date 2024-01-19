@@ -1,42 +1,47 @@
-const conn = require('../mariadb');
-const { ensureAuthorization } = require('../auth');
-const jwt = require('jsonwebtoken');
-const { StatusCodes } = require('http-status-codes');
+import conn from '../db/mariadb';
+import ensureAuthorization from '../auth/auth';
+import jwt from 'jsonwebtoken';
+import StatusCodes from 'http-status-codes';
+import { Request, Response } from 'express';
+import { RowDataPacket } from 'mysql2';
+import { Pagination } from '../types/books.types';
 
-const handleDatabaseError = (err, res) => {
+const handleDatabaseError = (err: Error, res: Response) => {
   console.log(err);
   return res.status(StatusCodes.BAD_REQUEST).end();
 };
 
-const allBooks = (req, res) => {
-  let allBooksRes = {};
+const allBooks = (req: Request, res: Response) => {
+  let allBooksRes: RowDataPacket;
   let { limit, currentPage, news, categoryId } = req.query;
 
-  limit = parseInt(limit);
-  let offset = (currentPage - 1) * limit;
+  let parsedLimit = parseInt(limit as string);
+  let parsedCurrentPage = parseInt(currentPage as string);
+  let offset = (parsedCurrentPage - 1) * parsedLimit;
+  let parsedCategoryId = parseInt(categoryId as string);
 
   let sql =
     'SELECT SQL_CALC_FOUND_ROWS *, (SELECT COUNT(*) FROM likes WHERE liked_book_id=books.id) AS likes FROM books';
-  let values = [];
+  let values: number[] = [];
 
   if (categoryId && news) {
     sql += ' WHERE category_id = ? AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()';
-    values = [...values, categoryId];
+    values = [...values, parsedCategoryId];
   } else if (categoryId) {
     sql += ' WHERE category_id = ?';
-    values = [...values, categoryId];
+    values = [...values, parsedCategoryId];
   } else if (news) {
     sql += ' WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()';
   }
 
   sql += ' LIMIT ?, ?';
-  values = [...values, offset, limit];
+  values = [...values, offset, parsedLimit];
 
-  conn.query(sql, values, (err, results) => {
+  conn.query(sql, values, (err, results: RowDataPacket[]) => {
     if (err) console.log(err);
     console.log(results);
-    if (results.length) {
-      results.map((result) => {
+    if (Array.isArray(results) && results.length) {
+      results.map((result: RowDataPacket) => {
         result.pubDate = result.pub_date;
         delete result.pub_date;
       });
@@ -45,12 +50,13 @@ const allBooks = (req, res) => {
   });
 
   sql = 'SELECT found_rows()';
-  conn.query(sql, (err, results) => {
+  conn.query(sql, (err, results: RowDataPacket[]) => {
     if (err) return handleDatabaseError(err, res);
 
-    let pagination = {};
-    pagination.currentPage = parseInt(currentPage);
-    pagination.totalCount = results[0]['found_rows()'];
+    let pagination: Pagination = {
+      currentPage: parsedCurrentPage,
+      totalCount: results[0]['found_rows()'],
+    };
 
     allBooksRes.pagination = pagination;
 
@@ -58,7 +64,7 @@ const allBooks = (req, res) => {
   });
 };
 
-const bookDetail = (req, res) => {
+const bookDetail = (req: Request, res: Response) => {
   const { bookId } = req.params;
   let authorization = ensureAuthorization(req);
   if (authorization instanceof jwt.TokenExpiredError) {
@@ -75,7 +81,7 @@ const bookDetail = (req, res) => {
     (SELECT COUNT(*) FROM likes WHERE liked_book_id=books.id) AS likes
     FROM books
     LEFT JOIN category ON books.category_id = category.category_id WHERE books.id=?;`;
-    conn.query(sql, values, (err, results) => {
+    conn.query(sql, values, (err, results: RowDataPacket[]) => {
       if (err) return handleDatabaseError(err, res);
       if (results[0]) {
         results[0].categoryId = results[0].category_id;
@@ -87,7 +93,7 @@ const bookDetail = (req, res) => {
         return res.status(StatusCodes.OK).json(results[0]);
       } else return res.status(StatusCodes.NOT_FOUND).end();
     });
-  } else {
+  } else if (authorization instanceof Object) {
     const values = [authorization.id, bookId, bookId];
     let sql = `SELECT *, 
   (SELECT COUNT(*) FROM likes WHERE liked_book_id=books.id) AS likes,
@@ -95,7 +101,7 @@ const bookDetail = (req, res) => {
   FROM books
   LEFT JOIN category ON books.category_id = category.category_id WHERE books.id=?;`;
 
-    conn.query(sql, values, (err, results) => {
+    conn.query(sql, values, (err, results: RowDataPacket[]) => {
       if (err) return handleDatabaseError(err, res);
       if (results[0]) {
         results[0].categoryId = results[0].category_id;
@@ -109,7 +115,4 @@ const bookDetail = (req, res) => {
     });
   }
 };
-module.exports = {
-  allBooks,
-  bookDetail,
-};
+export { allBooks, bookDetail };

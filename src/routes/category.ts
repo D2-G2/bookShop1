@@ -1,11 +1,12 @@
-const express = require('express');
+import express from 'express';
+import allCategory from '../controller/categoryController';
+
 const router = express.Router();
-const { allCategory } = require('../controller/categoryController');
 
 router.use(express.json());
 router.get('/', allCategory);
 
-module.exports = router;
+export default router;
 
 /**
  * @swagger

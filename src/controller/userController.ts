@@ -1,11 +1,14 @@
-const conn = require('../mariadb');
-const { StatusCodes } = require('http-status-codes');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const dotenv = require('dotenv');
+import conn from '../db/mariadb';
+import StatusCodes from 'http-status-codes';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+import { Request, Response } from 'express';
+import { RowDataPacket } from 'mysql2';
+
 dotenv.config();
 
-const join = (req, res) => {
+const join = (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   let sql = 'INSERT INTO users (email, password, salt) VALUES (?, ?, ?)';
@@ -24,12 +27,12 @@ const join = (req, res) => {
   });
 };
 
-const login = (req, res) => {
+const login = (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   let sql = 'SELECT * FROM users WHERE email = ?';
 
-  conn.query(sql, email, (err, results) => {
+  conn.query(sql, email, (err, results: RowDataPacket[]) => {
     if (err) {
       console.log(err);
       return res.status(400).end();
@@ -44,7 +47,7 @@ const login = (req, res) => {
           id: loginUser.id,
           email: loginUser.email,
         },
-        process.env.PRIVATE_KEY,
+        process.env.PRIVATE_KEY as string,
         {
           expiresIn: '5m',
           issuer: 'munseok',
@@ -64,11 +67,11 @@ const login = (req, res) => {
   });
 };
 
-const passwordResetRequest = (req, res) => {
+const passwordResetRequest = (req: Request, res: Response) => {
   const { email } = req.body;
 
   let sql = 'SELECT * FROM users WHERE email = ?';
-  conn.query(sql, email, (err, results) => {
+  conn.query(sql, email, (err, results: RowDataPacket[]) => {
     if (err) {
       console.log(err);
       return res.status(StatusCodes.BAD_REQUEST).end();
@@ -83,7 +86,7 @@ const passwordResetRequest = (req, res) => {
   });
 };
 
-const passwordReset = (req, res) => {
+const passwordReset = (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   const salt = crypto.randomBytes(10).toString('base64');
@@ -92,17 +95,17 @@ const passwordReset = (req, res) => {
   let sql = 'UPDATE users SET password = ?, salt = ? WHERE email = ?';
   let values = [hashPassword, salt, email];
 
-  conn.query(sql, values, (err, results) => {
+  conn.query(sql, values, (err, results: RowDataPacket[]) => {
     if (err) {
       console.log(err);
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
 
-    if (results.affectedRows === 0) {
+    if ('affectedRows' in results && results.affectedRows === 0) {
       return res.status(StatusCodes.NOT_FOUND).end();
     }
     return res.status(StatusCodes.OK).json(results);
   });
 };
 
-module.exports = { join, login, passwordResetRequest, passwordReset };
+export { join, login, passwordResetRequest, passwordReset };

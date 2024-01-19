@@ -1,5 +1,6 @@
-const express = require('express');
-const { getOrders, order, getOrderDetail } = require('../controller/orderController');
+import express from 'express';
+import { getOrders, order, getOrderDetail } from '../controller/orderController';
+
 const router = express.Router();
 
 router.use(express.json());
@@ -10,4 +11,4 @@ router.get('/', getOrders);
 
 router.get('/:orderId', getOrderDetail);
 
-module.exports = router;
+export default router;

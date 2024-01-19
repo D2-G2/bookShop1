@@ -1,9 +1,11 @@
-const conn = require('../mariadb');
-const { ensureAuthorization } = require('../auth');
-const { StatusCodes } = require('http-status-codes');
-let jwt = require('jsonwebtoken');
+import conn from '../db/mariadb';
+import ensureAuthorization from '../auth/auth';
+import StatusCodes from 'http-status-codes';
+import jwt from 'jsonwebtoken';
+import { Request, Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 
-const addCartItem = (req, res) => {
+const addCartItem = (req: Request, res: Response) => {
   let authorization = ensureAuthorization(req);
   if (authorization instanceof jwt.TokenExpiredError) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -13,7 +15,7 @@ const addCartItem = (req, res) => {
     return res.status(StatusCodes.BAD_REQUEST).json({
       message: '잘못된 토큰입니다.',
     });
-  } else {
+  } else if (authorization instanceof Object) {
     const { bookId, quantity } = req.body;
     let values = [authorization.id, bookId, quantity];
     let sql = 'INSERT INTO cartItems (user_id, book_id, quantity) VALUES (?, ?, ?)';
@@ -26,7 +28,7 @@ const addCartItem = (req, res) => {
     });
   }
 };
-const getCartItems = (req, res) => {
+const getCartItems = (req: Request, res: Response) => {
   let authorization = ensureAuthorization(req);
 
   if (authorization instanceof jwt.TokenExpiredError) {
@@ -37,7 +39,7 @@ const getCartItems = (req, res) => {
     return res.status(StatusCodes.BAD_REQUEST).json({
       message: '잘못된 토큰입니다.',
     });
-  } else {
+  } else if (authorization instanceof Object) {
     const { selected } = req.body;
     const values = [authorization.id];
 
@@ -50,7 +52,7 @@ const getCartItems = (req, res) => {
       sql += ` AND cartItems.id IN (?)`;
       values.push(selected);
     }
-    conn.query(sql, values, (err, results) => {
+    conn.query(sql, values, (err, results: RowDataPacket[]) => {
       if (err) {
         console.log(err);
         return res.status(StatusCodes.BAD_REQUEST).end();
@@ -66,7 +68,7 @@ const getCartItems = (req, res) => {
   }
 };
 
-const deleteCartItem = (req, res) => {
+const deleteCartItem = (req: Request, res: Response) => {
   let authorization = ensureAuthorization(req);
 
   if (authorization instanceof jwt.TokenExpiredError) {
@@ -89,4 +91,4 @@ const deleteCartItem = (req, res) => {
     });
   }
 };
-module.exports = { addCartItem, getCartItems, deleteCartItem };
+export { addCartItem, getCartItems, deleteCartItem };

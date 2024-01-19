@@ -1,14 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const conn = require('../mariadb');
-const jwt = require('jsonwebtoken');
-const { StatusCodes } = require('http-status-codes');
-const { body, validationResult } = require('express-validator');
-const { join, login, passwordReset, passwordResetRequest } = require('../controller/userController');
+import express, { Request, Response, NextFunction } from 'express';
+import { body, validationResult } from 'express-validator';
+import { join, login, passwordReset, passwordResetRequest } from '../controller/userController';
 
+const router = express.Router();
 router.use(express.json());
 
-const validate = (req, res, next) => {
+const validate = (req: Request, res: Response, next: NextFunction) => {
   const err = validationResult(req);
   if (err.isEmpty()) {
     return next();
@@ -46,7 +43,7 @@ router.post('/reset', passwordResetRequest);
 // 비밀번호 초기화
 router.put('/reset', passwordReset);
 
-module.exports = router;
+export default router;
 
 /**
  * @swagger

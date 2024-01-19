@@ -1,20 +1,15 @@
-const express = require('express');
-const { allBooks, bookDetail, filterBooks } = require('../controller/bookController');
+import express from 'express';
+import { allBooks, bookDetail } from '../controller/bookController';
+
 const router = express.Router();
 
 router.use(express.json());
 
 router.get('/', allBooks);
 
-// router.get('/', (req, res) => {
-//   if (Object.keys(req.query).length === 0) {
-//     return allBooks(req, res);
-//   } else categoryBooks(req, res);
-// });
-
 router.get('/:bookId', bookDetail);
 
-module.exports = router;
+export default router;
 
 /**
  * @swagger

@@ -1,10 +1,12 @@
-const conn = require('../mariadb');
-const { StatusCodes } = require('http-status-codes');
+import conn from '../db/mariadb';
+import StatusCodes from 'http-status-codes';
+import { Request, Response } from 'express';
+import { RowDataPacket } from 'mysql2';
 
-const allCategory = (req, res) => {
+const allCategory = (res: Response) => {
   let sql = 'SELECT * FROM category';
 
-  conn.query(sql, (err, results) => {
+  conn.query(sql, (err, results: RowDataPacket[]) => {
     if (err) {
       console.log(err);
       return res.status(StatusCodes.BAD_REQUEST).end();
@@ -21,4 +23,4 @@ const allCategory = (req, res) => {
   });
 };
 
-module.exports = { allCategory };
+export default allCategory;
